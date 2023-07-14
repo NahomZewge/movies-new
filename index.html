@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Movies</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+</head>
+
+<body style="background-color: rgb(0, 0, 0);">
+  
+  <nav class="navbar navbar-expand-lg text-light "style="background-color:#ff5b00">
+        <div class="container-fluid text-light">
+          <a class="navbar-brand text-light" href="#">Home of Movies</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 ">
+              <li class="nav-item ">
+                <a class="nav-link text-light" aria-current="page" id="episode">episodes</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link text-light" id="movies1" >Movies</a>
+              </li>
+            </ul>
+            <form class="d-flex" role="search">
+              <input class="form-control me-2" type="search" id="searchTerm" placeholder="Search" aria-label="Search">
+              <button class="btn btn-outline-warning" type="button" id="searchButton">Search</button>
+            </form>
+          </div>
+        </div>
+      </nav>
+    <center><div class="container m-3">
+     
+       <div class="row" id="contaner1">
+
+
+        </div>
+
+    </div></center>
+    <video autoplay  muted plays-inline style="position: absolute;right: 0; left: 0; width: 100%;height: 100vh;display: flex; align-items: center; justify-content: center;
+    bottom: 0;
+    z-index: -1;"><source src="0001-0150.mkv"></video> 
+    <center><div class="btn"style="padding: 60px 10px 0px 0px;">
+     <button type="button" id="getDataButton" class="btn btn-outline-dark text-dark"style="width: 150px;height: 80px;">Movies</button></center></div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+ 
+    <script>
+        let btn = document.getElementById('getDataButton')
+        btn.addEventListener('click', getMovie)
+
+        let movies1 = document.getElementById('movies1')
+        movies1.addEventListener('click', getMovie)
+
+        let searchButton = document.getElementById('searchButton')
+
+        let episode = document.getElementById('episode')
+        episode.addEventListener('click', episodes)
+
+        let container1 = document.getElementById('contaner1')
+        let shows =[]
+        function getMovie() {
+          container1.innerHTML=``
+            fetch('https://api.tvmaze.com/shows?page=1')
+                .then((response) => response.json())
+                .then((response) => {
+                    
+                    shows =response
+                    console.log(shows)
+                    for (let i = 0; i < shows.length; i++) {
+
+                        let card = document.createElement('div')
+
+                        card.style = 'style= width: 25rem'; 
+
+                        card.setAttribute('class', 'col-lg-2 col-md-2 col-sm-2 m-2  card bg-dark text-light')
+
+                        let img = document.createElement('img')
+
+                        img.classList.add('card-img-top')
+
+                        let title = document.createElement('h5')
+
+                        title.setAttribute('class', 'card-title')
+
+                        title.innerHTML = shows[i].name
+
+                        img.src =shows[i].image.medium
+                        
+
+                        let description = document.createElement('h6');
+                description.setAttribute('class', 'card-text text-light');
+               
+               // description.style="font-size:13px;text-align:center;"
+                //description.innerHTML = shows[i].summary
+
+                        let rating = document.createElement('rating')
+                        rating.setAttribute('class', 'card-text text-light');
+                        rating.innerHTML =`Rating: ${shows[i].rating.average}`
+                       
+                        let btn2 = document.createElement("btn2");
+                        btn.style ='style: width=2rem'
+                        const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
+const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
+btn2.innerHTML += `<button type="button" class="btn btn-lg btn-warning" data-bs-trigger="focus hover" data-bs-toggle="popover" data-bs-title="${shows[i].name}" data-bs-content="${shows[i].summary}">Discription</button>
+`;
+
+                         
+                        
+                        card.appendChild(img)
+                        card.appendChild(title)
+                        card.appendChild(rating)
+                        card.appendChild(description)
+                        card.appendChild(btn2)
+                        container1.append(card)
+                        
+                    }
+                }).catch((error) => {
+                    console.log('Error:', error);
+                });
+        }
+       
+
+searchButton.onclick = async () => {
+  const searchTerm = document.querySelector('#searchTerm').value;
+
+if (searchTerm === '') {
+  console.log('Search term is empty');
+  return;
+}
+
+const url = `https://api.tvmaze.com/search/shows?q=${searchTerm}`;
+const response = await fetch(url);
+console.log(response)
+if (!response.ok) {
+  console.log('Error fetching movies');
+  return;
+}
+
+const json = await response.json();
+console.log(json)
+if(json.Error=='Too many results.'){
+  alert('Too many results! Make your query specific')
+  return
+}
+if(json.Error=='Movie not found!'){
+  alert('Movie not found!')
+  return
+}
+
+
+
+  container1.innerHTML=``
+for (let i = 0; i < json.length; i++) {
+  const movie = json[i].show;
+  container1.innerHTML +=`<div class="col-3 card m-2 bg-dark" style=";width:16rem;">
+                    <div class="card-header">
+                        <img src="${movie.image.medium}" alt="${movie.Title}" style="height:16rem">
+                        <h5 class="mt=3 text-light text-center">${movie.name}</h5>
+                        <p class="mt=3 text-center" style="color:white;">Type: ${movie.schedule.type
+} &ensp; Year ${movie.Year}</p>
+                    </div>
+                    <div class="card-body">
+                    </div>
+                </div>`;
+            }
+
+}
+
+
+
+
+
+
+function episodes() {
+          container1.innerHTML=``
+            fetch('https://api.tvmaze.com/shows/1/episodes')
+                .then((response) => response.json())
+                .then((response) => {
+                    
+                    shows =response
+                    console.log(shows)
+                    
+                    for (let i = 0; i < shows.length; i++) {
+
+                        let card = document.createElement('div')
+
+                        card.style = 'style=width: 70rem;'; 
+
+                        card.setAttribute('class', 'col-lg-2 col-md-2 col-sm-2 m-2  card bg-dark text-light')
+
+                        let img = document.createElement('img')
+
+                        img.classList.add('card-img-top')
+
+                        let title = document.createElement('h5')
+
+                        title.setAttribute('class', 'card-title')
+
+                        title.innerHTML = shows[i].name
+
+                        img.src =shows[i].image.medium
+
+                        let description = document.createElement('h6');
+                description.setAttribute('class', 'card-text text-light');
+               
+               // description.style="font-size:13px;text-align:center;"
+                //description.innerHTML = shows[i].summary
+
+                        let rating = document.createElement('rating')
+                        rating.setAttribute('class', 'card-text text-light');
+                        rating.innerHTML =`Rating: ${shows[i].rating.average}`
+                       
+                        let btn2 = document.createElement("btn2");
+                        const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
+const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
+btn2.innerHTML += `<button type="button"  class="btn btn-lg btn-warning" data-bs-trigger="focus hover" data-bs-toggle="popover" data-bs-title="${shows[i].name}"
+ data-bs-content="${shows[i].summary}">Discription</button>
+`;
+
+                         
+                        
+                        card.appendChild(img)
+                        card.appendChild(title)
+                        card.appendChild(rating)
+                        card.appendChild(description)
+                        card.appendChild(btn2)
+                        container1.append(card)
+
+                    }
+                }).catch((error) => {
+                    console.log('Error:', error);
+                });
+        }
+</script>
+
+</body>
+
+
+
+
+</html>
